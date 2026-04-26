@@ -114,10 +114,35 @@ const commonWords = [
 "progress","purpose","quality","reality","success","transform","vision"
 ];
 
+let wordList = [];
+
+async function loadWords() {
+    if (wordList.length > 0) return; // already loaded
+
+    const res = await fetch("https://raw.githubusercontent.com/dwyl/english-words/master/words_dictionary.json");
+    const data = await res.json();
+
+    // convert object keys → array
+    wordList = Object.keys(data);
+
+    console.log("Words loaded:", wordList.length);
+}
+
+function getRandomWord() {
+    return wordList[Math.floor(Math.random() * wordList.length)];
+}
 async function getWord() {
     document.getElementById("word").innerText = "Loading...";
 
-    const randomWord = commonWords[Math.floor(Math.random() * commonWords.length)];
+    // const randomWord = commonWords[Math.floor(Math.random() * commonWords.length)];
+    // const wordRes = await fetch("https://random-word-api.herokuapp.com/word");
+    // const wordData = await wordRes.json();
+    
+    // const randomWord = wordData[0];
+
+    await loadWords(); // ensure words are loaded
+
+    const randomWord = getRandomWord();
 
     try {
         const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${randomWord}`);
