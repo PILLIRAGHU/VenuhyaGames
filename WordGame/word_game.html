@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Learning App</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .container {
+        width: 380px;
+        padding: 20px;
+        border-radius: 20px;
+        backdrop-filter: blur(15px);
+        background: rgba(255,255,255,0.15);
+        color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        text-align: center;
+        animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px);}
+        to { opacity: 1; transform: translateY(0);}
+    }
+
+    h1 {
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .phonetic {
+        opacity: 0.8;
+        margin-bottom: 10px;
+    }
+
+    .meaning {
+        margin: 15px 0;
+        font-size: 15px;
+    }
+
+    .example {
+        font-style: italic;
+        opacity: 0.9;
+        margin-bottom: 15px;
+    }
+
+    img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 15px;
+    }
+
+    button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 10px;
+        margin: 5px;
+        cursor: pointer;
+        background: white;
+        color: #333;
+        font-weight: bold;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        transform: scale(1.05);
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1 id="word">Loading...</h1>
+    <div class="phonetic" id="phonetic"></div>
+
+    <!-- <img id="image" src="" alt="Word Image"> -->
+
+    <div class="meaning" id="meaning"></div>
+    <div class="example" id="example"></div>
+
+    <button onclick="playAudio()">🔊 Pronounce</button>
+    <button onclick="getWord()">Next Word</button>
+</div>
+
+<script>
+let audioUrl = "";
+
+// A small curated list (can be expanded to 10k if you want locally)
+const commonWords = [
+"ability","absence","academy","account","achievement","adapt","advance",
+"adventure","balance","beauty","belief","brilliant","capture","career",
+"celebrate","challenge","clarity","creative","culture","curious","define",
+"delight","discover","dynamic","elegant","energy","explore","freedom",
+"future","growth","harmony","imagine","inspire","journey","knowledge",
+"language","learn","memory","nature","opportunity","passion","peace",
+"progress","purpose","quality","reality","success","transform","vision"
+];
+
+async function getWord() {
+    document.getElementById("word").innerText = "Loading...";
+
+    const randomWord = commonWords[Math.floor(Math.random() * commonWords.length)];
+
+    try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${randomWord}`);
+        const data = await res.json();
+
+        const wordData = data[0];
+
+        document.getElementById("word").innerText = wordData.word;
+
+        // phonetic
+        document.getElementById("phonetic").innerText =
+            wordData.phonetic || (wordData.phonetics[0]?.text || "");
+
+        // audio
+        audioUrl = wordData.phonetics.find(p => p.audio)?.audio || "";
+
+        // meaning
+        const meaning = wordData.meanings[0].definitions[0].definition;
+        document.getElementById("meaning").innerText = meaning;
+
+        // example
+        const example = wordData.meanings[0].definitions[0].example || "No example available";
+        document.getElementById("example").innerText = example;
+
+        // image
+        // document.getElementById("image").src =
+        //     `https://source.unsplash.com/400x300/?${example}`;
+
+    } catch (e) {
+        document.getElementById("word").innerText = "Error loading word";
+    }
+}
+
+function playAudio() {
+    if (!audioUrl) return alert("No audio available");
+    const audio = new Audio(audioUrl);
+    audio.play();
+}
+
+// initial load
+getWord();
+
+</script>
+
+</body>
+</html>
