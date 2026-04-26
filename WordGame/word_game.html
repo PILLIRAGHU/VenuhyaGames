@@ -117,21 +117,33 @@ const commonWords = [
 let wordList = [];
 
 async function loadWords() {
+
+
+
     if (wordList.length > 0) return; // already loaded
 
-    const res = await fetch("https://raw.githubusercontent.com/dwyl/english-words/master/words_dictionary.json");
+    // const res = await fetch("https://raw.githubusercontent.com/dwyl/english-words/master/words_dictionary.json");
+    // const data = await res.json();
+
+    const res = await fetch("words.json");
     const data = await res.json();
 
     // convert object keys → array
-    wordList = Object.keys(data);
+    wordList = data.words;
+    // wordList = Object.keys(data);
 
-    console.log("Words loaded:", wordList.length);
+    // console.log("Words loaded:", wordList.length);
 }
 
 function getRandomWord() {
     return wordList[Math.floor(Math.random() * wordList.length)];
 }
 async function getWord() {
+    if (!localStorage.getItem("words")) {
+    localStorage.setItem("words", JSON.stringify(wordList));
+    } else {
+    wordList = JSON.parse(localStorage.getItem("words"));
+    }
     document.getElementById("word").innerText = "Loading...";
 
     // const randomWord = commonWords[Math.floor(Math.random() * commonWords.length)];
@@ -184,6 +196,7 @@ function playAudio() {
 
 // initial load
 getWord();
+
 
 </script>
 
